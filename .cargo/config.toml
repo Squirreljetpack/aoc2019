@@ -1,0 +1,81 @@
+[alias]
+today = "run --quiet --release --features today -- today"
+scaffold = "run --quiet --release -- scaffold"
+download = "run --quiet --release -- download"
+read = "run --quiet --release -- read"
+solve = "run --quiet --release -- solve"
+all = "run --quiet --release -- all"
+time = "run --quiet --release -- time --store"
+
+"@s" = "start"
+"@s1" = "submit_p1"
+"@s2" = "submit_p2"
+"@s3" = "solve_n"
+"@r" = "solve_n"
+"@t" = "test_n"
+
+start = [
+  "exec",
+  "SHELL=zsh",
+  "-sr",
+  '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
+  echo Day $n;
+  src=src/bin/${(l:2::0:)n}.rs; [[ ! -e $src ]] && cargo scaffold $n --download; cargo read $n | $PAGER && code -a . $src data/puzzles/${(l:2::0:)n}.md'''
+]
+
+submit_p1 = [
+  "exec",
+  "SHELL=zsh",
+  "-s",
+  '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
+  echo Day $n
+  cargo solve $n --submit 1 | tee /dev/tty | grep -q "right answer!" &&
+  cargo download $n && cargo start $n &> /dev/null'''
+]
+
+submit_p2 = [
+  "exec",
+  "SHELL=zsh",
+  "-s",
+  '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
+  echo Day $n
+  cargo solve $n --submit 2 | tee /dev/tty | grep -q "right answer!" &&
+  ex -sc '$d|x' data/puzzles/${(l:2::0:)n}.md && echo \#complete >> data/puzzles/${(l:2::0:)n}.md && cargo start'''
+]
+
+"@refresh" = [
+  "exec",
+  "SHELL=zsh",
+  "-s",
+  '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
+  { cargo download $n; code -a data/puzzles/${(l:2::0:)n}.md; }&'''
+]
+
+solve_n = [
+  "exec",
+  "SHELL=zsh",
+  "-s",
+  '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
+  echo Day $n
+  cargo solve $n
+  printf "Record? [y/N] "
+  read -r ans
+  [[ -z $ans || $ans != [Yy]* ]] && return
+  cargo time $n'''
+]
+
+test_n = [
+  "exec",
+  "SHELL=zsh",
+  "-s",
+  '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
+  echo Day $n
+  [[ $2 == 2 ]] && part=part_two || part=part_one
+  cargo test --bin ${(l:2::0:)n} $part -- --no-capture'''
+]
+
+[env]
+AOC_YEAR = "2015"
+
+# [build]
+# rustflags = ["-L", "/opt/homebrew/lib"]

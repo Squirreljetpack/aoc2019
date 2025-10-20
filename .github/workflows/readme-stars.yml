@@ -1,35 +1,43 @@
 name: Update readme ⭐️ progress
 
 on:
-    workflow_dispatch:
-    push:
-        branches:
-          - main
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-    update-readme:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@v4
-              
-            - name: Load AOC year
-              run: |
-                CONFIG=".cargo/config.toml"
-                
-                if [ -f "$CONFIG" ]; then
-                AOC_YEAR=$(grep '^AOC_YEAR' "$CONFIG" | grep -oP '"\K[0-9]+')
-                fi
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
 
-                AOC_YEAR=${AOC_YEAR:-${{ secrets.AOC_YEAR }}}
-                echo "AOC_YEAR=$AOC_YEAR" >> $GITHUB_ENV
+      - name: Load AOC year
+        run: |
+          CONFIG=".cargo/config.toml"
 
-            - uses: k2bd/advent-readme-stars@v1
-              with:
-                  userId: ${{ secrets.AOC_USER_ID }}
-                  sessionCookie: ${{ secrets.AOC_SESSION }}
-                  year: ${{ env.AOC_YEAR }}
-            - uses: stefanzweifel/git-auto-commit-action@v5
-              with:
-                  commit_message: "update readme progress"
+          if [ -f "$CONFIG" ] && AOC_YEAR=$(grep -oP '^AOC_YEAR\s*=\s*"\K[^"]+' "$CONFIG"); then
+            echo "AOC_YEAR=$AOC_YEAR" >> $GITHUB_ENV
+          fi
+
+
+      - name: Replace {{year}} in README.md
+        if: env.AOC_YEAR != ''
+        run: |
+          if grep -q '{{year}}' README.md; then
+            sed -i "s/{{year}}/${{ env.AOC_YEAR }}/g" README.md
+          fi
+
+      - uses: k2bd/advent-readme-stars@v1
+        if: env.AOC_YEAR != ''
+        with:
+          userId: ${{ secrets.AOC_USER_ID }}
+          sessionCookie: ${{ secrets.AOC_SESSION }}
+          year: ${{ env.AOC_YEAR }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: env.AOC_YEAR != ''
+        with:
+          commit_message: "update readme progress"

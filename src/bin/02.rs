@@ -1,46 +1,25 @@
 #![allow(unused_variables, unused_macros)]
 
-use aoc_lib::parse::get_u64;
-
-advent_of_code::solution!(1);
-
-fn compute(i: u64) -> u64 {
-    (i / 3).saturating_sub(2)
-}
+advent_of_code::solution!(2);
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let mut total = 0;
-    for l in input.lines() {
-        let i = get_u64(l);
-        total += compute(i);
-    }
-    
-    Some(total)
+    None
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let mut total = 0;
-    for l in input.lines() {
-        let mut i = compute(get_u64(l));
-        while i > 0 {
-            total += i;
-            i = compute(i);
-        }
-    }
-    
-    Some(total)
+    None
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, None);
     }
-    
+
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));

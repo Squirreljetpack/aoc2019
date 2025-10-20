@@ -20,6 +20,7 @@ today = ["chrono"]
 test_lib = []
 
 [dependencies]
+aoc_lib = { version = "0.1.0", path = "../aoc_lib" }
 
 # Template dependencies
 chrono = { version = "0.4.38", optional = true }

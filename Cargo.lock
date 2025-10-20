@@ -21,6 +21,7 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 name = "advent_of_code"
 version = "0.11.0"
 dependencies = [
+ "aoc_lib",
  "chrono",
  "dhat",
  "pico-args",
@@ -41,6 +42,10 @@ checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "aoc_lib"
+version = "0.1.0"
 
 [[package]]
 name = "autocfg"

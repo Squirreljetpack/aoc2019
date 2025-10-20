@@ -1,7 +1,8 @@
 [alias]
 today = "run --quiet --release --features today -- today"
 scaffold = "run --quiet --release -- scaffold"
-download = "run --quiet --release -- download"
+# rename to avoid shadowing cargo-download https://github.com/rust-lang/cargo/issues/10049 (although this issue seems questionable too)
+get = "run --quiet --release -- download"
 read = "run --quiet --release -- read"
 solve = "run --quiet --release -- solve"
 all = "run --quiet --release -- all"
@@ -30,7 +31,7 @@ submit_p1 = [
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
   echo Day $n
   cargo solve $n --submit 1 | tee /dev/tty | grep -q "right answer!" &&
-  cargo download $n && cargo start $n &> /dev/null'''
+  cargo get $n && cargo start $n &> /dev/null'''
 ]
 
 submit_p2 = [
@@ -48,7 +49,7 @@ submit_p2 = [
   "SHELL=zsh",
   "-s",
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
-  { cargo download $n; code -a data/puzzles/${(l:2::0:)n}.md; }&'''
+  { cargo get $n; code -a data/puzzles/${(l:2::0:)n}.md; }&'''
 ]
 
 solve_n = [

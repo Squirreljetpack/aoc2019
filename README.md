@@ -2,12 +2,12 @@
 
 Check out [GETTING_STARTED.md](https://github.com/Squirreljetpack/aoc_template/blob/main/GETTING_STARTED.md), and the [original template](https://github.com/fspoettel/advent-of-code-rust).
 
-# 🎄 Advent of Code {{year}}
+# 🎄 Advent of Code 2019
 
 Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.rust-lang.org/).
 
 <!--- advent_readme_stars table --->
-## {{year}} Results
+## 2019 Results
 
 | Day | Part 1 | Part 2 |
 | :---: | :---: | :---: |

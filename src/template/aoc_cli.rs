@@ -49,26 +49,39 @@ pub fn read(day: Day) -> Result<Output, AocCommandError> {
     call_aoc_cli(&args)
 }
 
-pub fn download(day: Day) -> Result<Output, AocCommandError> {
+pub fn download(day: Day, puzzle_only: bool) -> Result<Output, AocCommandError> {
     let input_path = get_input_path(day);
     let puzzle_path = get_puzzle_path(day);
 
-    let args = build_args(
-        "download",
-        &[
+    let args = if puzzle_only {
+        vec![
+            "--overwrite".into(),
+            "-P".into(),
+            "--puzzle-file".into(),
+            puzzle_path.to_string(),
+        ]
+    } else {
+        vec![
             "--overwrite".into(),
             "--input-file".into(),
             input_path.to_string(),
             "--puzzle-file".into(),
             puzzle_path.to_string(),
-        ],
+        ]
+    };
+
+    let args = build_args(
+        "download",
+        &args,
         day,
     );
 
     let output = call_aoc_cli(&args)?;
     println!("---");
-    println!("🎄 Successfully wrote input to \"{}\".", &input_path);
-    println!("🎄 Successfully wrote puzzle to \"{}\".", &puzzle_path);
+    if ! puzzle_only {
+        println!("🎄 Input written to \"{}\".", &input_path);
+    }
+    println!("🎄 Puzzle written to \"{}\".", &puzzle_path);
     Ok(output)
 }
 
@@ -91,7 +104,10 @@ fn get_puzzle_path(day: Day) -> String {
 fn get_year() -> Option<u16> {
     match std::env::var("AOC_YEAR") {
         Ok(x) => x.parse().ok().or(None),
-        Err(_) => None,
+        Err(_) => {
+            eprintln!("Warning: Year not set in .cargo/config.toml, assuming current year.");
+            None
+        },
     }
 }
 

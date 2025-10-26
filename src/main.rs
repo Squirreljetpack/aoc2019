@@ -13,6 +13,7 @@ mod args {
     pub enum AppArguments {
         Download {
             day: Day,
+            puzzle_only: bool
         },
         Read {
             day: Day,
@@ -59,6 +60,7 @@ mod args {
             }
             Some("download") => AppArguments::Download {
                 day: args.free_from_str()?,
+                puzzle_only: args.contains("--puzzle") || args.contains("-P"),
             },
             Some("read") => AppArguments::Read {
                 day: args.free_from_str()?,
@@ -104,7 +106,7 @@ fn main() {
         Ok(args) => match args {
             AppArguments::All { release } => all::handle(release),
             AppArguments::Time { day, all, store } => time::handle(day, all, store),
-            AppArguments::Download { day } => download::handle(day),
+            AppArguments::Download { day, puzzle_only } => download::handle(day, puzzle_only),
             AppArguments::Read { day } => read::handle(day),
             AppArguments::Scaffold {
                 day,
@@ -113,7 +115,7 @@ fn main() {
             } => {
                 scaffold::handle(day, overwrite);
                 if download {
-                    download::handle(day);
+                    download::handle(day, false);
                 }
             }
             AppArguments::Solve {

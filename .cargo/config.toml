@@ -1,3 +1,6 @@
+[env]
+AOC_YEAR = "2019" # "2015"
+
 [alias]
 today = "run --quiet --release --features today -- today"
 scaffold = "run --quiet --release -- scaffold"
@@ -31,7 +34,7 @@ submit_p1 = [
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
   echo Day $n
   cargo solve $n --submit 1 | tee /dev/tty | grep -q "right answer!" &&
-  cargo get $n && cargo start $n &> /dev/null'''
+  cargo download $n -P && cargo start $n &> /dev/null'''
 ]
 
 submit_p2 = [
@@ -41,6 +44,7 @@ submit_p2 = [
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
   echo Day $n
   cargo solve $n --submit 2 | tee /dev/tty | grep -q "right answer!" &&
+  cargo download $n -P &&
   ex -sc '$d|x' data/puzzles/${(l:2::0:)n}.md && echo \#complete >> data/puzzles/${(l:2::0:)n}.md && cargo start'''
 ]
 
@@ -74,9 +78,6 @@ test_n = [
   [[ $2 == 2 ]] && part=part_two || part=part_one
   cargo test --bin ${(l:2::0:)n} $part -- --no-capture'''
 ]
-
-[env]
-AOC_YEAR = "2019"
 
 # [build]
 # rustflags = ["-L", "/opt/homebrew/lib"]

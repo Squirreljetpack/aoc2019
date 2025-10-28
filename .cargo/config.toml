@@ -11,14 +11,15 @@ solve = "run --quiet --release -- solve"
 all = "run --quiet --release -- all"
 time = "run --quiet --release -- time --store"
 
-"@s" = "start"
+"@n" = "next_day"
+"@s" = "solve_n"
 "@s1" = "submit_p1"
 "@s2" = "submit_p2"
-"@s3" = "solve_n"
-"@r" = "solve_n"
 "@t" = "test_n"
+"@t1" = "test_n _ 1"
+"@t2" = "test_n _ 2"
 
-start = [
+next_day = [
   "exec",
   "SHELL=zsh",
   "-sr",
@@ -34,7 +35,7 @@ submit_p1 = [
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
   echo Day $n
   cargo solve $n --submit 1 | tee /dev/tty | grep -q "right answer!" &&
-  cargo download $n -P && cargo start $n &> /dev/null'''
+  cargo get $n -P && cargo next_day $n &> /dev/null'''
 ]
 
 submit_p2 = [
@@ -44,8 +45,8 @@ submit_p2 = [
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
   echo Day $n
   cargo solve $n --submit 2 | tee /dev/tty | grep -q "right answer!" &&
-  cargo download $n -P &&
-  ex -sc '$d|x' data/puzzles/${(l:2::0:)n}.md && echo \#complete >> data/puzzles/${(l:2::0:)n}.md && cargo start'''
+  cargo get $n -P &&
+  ex -sc '$d|x' data/puzzles/${(l:2::0:)n}.md && echo \#complete >> data/puzzles/${(l:2::0:)n}.md && cargo next_day'''
 ]
 
 "@refresh" = [
@@ -75,8 +76,47 @@ test_n = [
   "-s",
   '''n=$1; if ! ((n)); then n=1; while [[ -e data/puzzles/${(l:2::0:)n}.md && "$(tail -n 1 data/puzzles/${(l:2::0:)n}.md)" == \#* ]]; do ((n++)); done; fi;
   echo Day $n
-  [[ $2 == 2 ]] && part=part_two || part=part_one
+  [[ $2 == 1 ]] && part=part_one
+  [[ $2 == 2 ]] && part=part_two
   cargo test --bin ${(l:2::0:)n} $part -- --no-capture'''
+]
+
+set_secrets = [
+  "exec",
+  "SHELL=zsh",
+  "-s",
+'''
+# Check current repo
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+if [[ -z "$REPO" ]]; then
+    echo "Not inside a GitHub repository or gh CLI not authenticated."
+    exit 1
+fi
+
+read "AOC_USER_ID?Enter your AOC_USER_ID: "
+
+DEFAULT_FILE="${HOME}/.adventofcode.session"
+DEFAULT_SESSION_VALUE="${ADVENT_OF_CODE_SESSION:-}"
+if [[ -f "$DEFAULT_FILE" ]]; then
+    DEFAULT_SESSION_VALUE=$(<"$DEFAULT_FILE")
+fi
+
+read "AOC_SESSION?Enter your AOC_SESSION ($DEFAULT_SESSION_VALUE): "
+AOC_SESSION="${AOC_SESSION:-$DEFAULT_SESSION_VALUE}"
+
+if [[ "$AOC_SESSION" != "$DEFAULT_SESSION_VALUE" ]]; then
+    read "REPLY?Write session to $DEFAULT_FILE? (y/N): "
+    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+        echo "$AOC_SESSION" >| "$DEFAULT_FILE"
+        echo "Saved session to $DEFAULT_FILE"
+    fi
+fi
+
+gh secret set AOC_USER_ID --body "$AOC_USER_ID"
+gh secret set AOC_SESSION --body "$AOC_SESSION"
+
+echo "Secrets set successfully."
+'''
 ]
 
 # [build]

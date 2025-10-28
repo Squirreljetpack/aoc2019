@@ -1,4 +1,5 @@
 #![allow(unused_variables, unused_macros)]
+static TARGET: usize = 19690720;
 
 use aoc_lib::{_dbg};
 use itertools::{iproduct};
@@ -35,7 +36,6 @@ fn run(v: &mut Vec<usize>, mut i: usize) -> Option<usize> {
     Some(v[0])
 }
 
-static TARGET: usize = 19690720;
 
 pub fn part_one(input: &str) -> Option<u64> {
     let mut v = parse(input);

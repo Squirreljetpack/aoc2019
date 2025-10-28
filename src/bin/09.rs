@@ -20,7 +20,7 @@ pub fn part_two(input: &str) -> Option<u64> {
 }
 
 // --------------------------------------------- //
-advent_of_code::solution!(%DAY_NUMBER%);
+advent_of_code::solution!(9);
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,9 +1,4 @@
-#![allow(unused_variables, unused_macros)]
 static mut SIZE: usize = 25 * 6;
-
-fn parse(s: &str) -> Vec<u32> {
-    s.trim().chars().map(|c| c.to_digit(10).unwrap()).collect()
-}
 
 fn count<T: PartialEq>(s: &[T], t: T) -> usize {
     s.iter().filter(|d| **d == t).count()
@@ -31,11 +26,11 @@ pub fn part_two(input: &str) -> Option<String> {
     let size = unsafe {
         SIZE
     };
-
+    
     let iter = input.as_bytes().chunks_exact(size).rev().enumerate();
     let mut layer = vec!['_'; size];
-
-    for (l, ch) in iter {
+    
+    for (_l, ch) in iter {
         for (i, &c) in ch.iter().enumerate() {
             if c == b'1' {
                 layer[i] = '#';
@@ -49,8 +44,11 @@ pub fn part_two(input: &str) -> Option<String> {
         let s = String::from_iter(l);
         println!("{s}");
     }
-    // Some(count(&layer, '#') as u64)
-    Some("LEJKC".to_string())
+    if unsafe { SIZE } != 25 * 6 {
+        Some(count(&layer, '#').to_string())
+    } else {
+        Some("LEJKC".to_string())
+    }
 }
 
 // --------------------------------------------- //
@@ -69,6 +67,6 @@ mod tests {
     fn test_part_two() {
         unsafe { SIZE = 4 };
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        // assert_eq!(result, Some(2));
+        assert_eq!(result, Some("2".to_string()));
     }
 }

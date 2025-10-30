@@ -1,6 +1,4 @@
-#![allow(unused_variables, unused_macros)]
-// static mut TARGET: u64 = 0;
-
+use aoc_lib::{_eprintln};
 use itertools::Itertools;
 
 
@@ -72,7 +70,6 @@ impl Amplifier {
                         outputs.push(self.v[a as usize]);
                     }
                     self.i += 2;
-                    break;
                 }
                 1 | 2 | 7 | 8 => {
                     let (mut a, mut b, target) = (self.v[self.i + 1], self.v[self.i + 2], self.v[self.i + 3]);
@@ -148,29 +145,39 @@ pub fn part_two(input: &str) -> Option<u64> {
         
         let mut ax = 0;
         let mut e_last = input;
+        let mut input = vec![input];
         loop {
-            let output = amps[ax]._run(vec![input]);
-            if let Some(last) = output.last() {
-                input = *last;
-                if ax == 4 {
-                    e_last = input;
+            input = amps[ax]._run(input);
+            
+            match (input.last(), amps[ax].halted) {
+                (Some(&last), h) => {
+                    if h {
+                        _eprintln!("{ax}: halted with output {input:?}");
+                    }
+                    if ax == 4 {
+                        e_last = last;
+                        if h {
+                            _eprintln!("");
+                            break
+                        }
+                    }
+                },
+                (None, true) => {
+                    _eprintln!("{ax}: halted without output");
+                    break
+                }
+                (None, false) => {
+                    panic!("{ax}: no output")
                 }
             }
-            if amps[ax].halted {
-                // assert!(ax == 4 || output.len() > 0); <- break on any halt ig
-                assert!(output.is_empty());
-                break;
-            } else {
-                assert!(!output.is_empty())
-            }
             ax = (ax + 1) % 5;
+            
         }
-
         ret = ret.max(e_last)
     }
-    
     Some(ret as u64)
 }
+
 
 // --------------------------------------------- //
 advent_of_code::solution!(7);

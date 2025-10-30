@@ -1,4 +1,3 @@
-#![allow(unused_variables, unused_macros)]
 static mut TARGET: &str = "COM";
 
 use std::collections::HashMap;

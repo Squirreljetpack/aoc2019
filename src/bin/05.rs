@@ -1,5 +1,3 @@
-#![allow(unused_variables, unused_macros)]
-
 use aoc_lib::_dbg;
 static mut TARGET: isize = 1;
 

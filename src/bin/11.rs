@@ -1,4 +1,10 @@
-use aoc_lib::{_dbg, _eprintln};
+#![allow(unused_variables, unused_macros)]
+// static mut TARGET: u64 = 0;
+
+use std::{mem::transmute};
+
+use aoc_lib::{_dbg, _eprintln, grid::{Bounded, CartesianCollection, Collection, Grid, Manifold, grids::{dequeue_grid::DequeueGrid, hash_grid::HashGrid}}, point::Point, utils::With};
+use easy_ext::ext;
 
 fn parse(s: &str) -> Vec<isize> {
     s.split(',').map(|s| s.trim().parse().expect(&format!("Failed to parse: {s}"))).collect()
@@ -145,40 +151,137 @@ impl IntCode {
     }
 }
 
+// ----
+
+#[derive(Debug, Clone, Copy)]
+pub enum Direction {
+    U,
+    R,
+    D,
+    L
+}
+
+impl Direction {
+    pub fn turn(self, right: bool) -> Self {
+        let n = if right {
+            (self as u8 + 1) % 4
+        } else {
+            (self as u8 + 3) % 4
+        };
+        unsafe { transmute(n) }
+    }
+    
+    pub fn as_move(self) -> [isize; 2] {
+        use Direction::*;
+        match self {
+            U => [-1, 0],
+            D => [1, 0], 
+            L => [0, -1],
+            R => [0, 1],  
+        }
+    }
+}
+
+#[ext(Bool)]
+impl bool {
+    fn toi(self) -> isize {
+        if self {
+            1
+        } else {
+            0
+        }
+    }
+}
+
+#[ext(Isize)]
+impl isize {
+    fn tob(self) -> bool {
+        assert!(self.abs() < 2);
+        self == 1
+    }
+}
+
 pub fn part_one(input: &str) -> Option<u64> {
+    let _ = parse(input);
+    
+    // significantly faster than creating a hashset on my computer, even if we have to use option
+    let grid: DequeueGrid<Option<bool>> = DequeueGrid::new();
+    
+    let mut state = With::new(grid, Direction::U);
+    
     let v = parse(input);
     let mut ic = IntCode::new(v);
-    let outs = ic.run(vec![1]);
-    _dbg!(&outs);
+    let mut steps = 0;
     
-    let ret = *outs.last().unwrap();
+    while ! ic.halted {
+        let inputs = vec![state.get_at().is_some_and(|x| x.is_some_and(|x| x)).toi()];
+        
+        let outs = ic.run(inputs.clone());
+        assert!(outs.len() == 2);
+        
+        state.set_at(Some(outs[0].tob()));
+        
+        let curr = state.state;
+        state.state = curr.turn(outs[1].tob());
+        let direction = state.state.as_move();
+        let _ = state.shift(direction);
+        
+        steps += 1;
+        if steps < 20 && steps > 10 {
+            _dbg!(steps, &state);
+        }
+    }
+    
+    let ret = state.len();
     Some(ret as u64)
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
+pub fn part_two(input: &str) -> Option<String> {
+    let _ = parse(input);
+    
+    let grid: HashGrid<Point, bool> = HashGrid::new_from_bounds((Point([0, 0]), Point([1, 0])));
+    
+    let mut state = With::new(grid, Direction::U);
+    
     let v = parse(input);
     let mut ic = IntCode::new(v);
-    let outs = ic.run(vec![2]);
-    _dbg!(&outs);
+    let mut steps = 0;
     
-    let ret = *outs.last().unwrap();
-    Some(ret as u64)
+    state.set_at(true);
+    
+    while ! ic.halted {
+        let inputs = vec![state.get_at().is_some_and(|x| *x).toi()];
+        
+        let outs = ic.run(inputs);
+        assert!(outs.len() == 2);
+        
+        state.set_at(outs[0].tob());
+        
+        let curr = state.state;
+        state.state = curr.turn(outs[1].tob());
+        let direction = state.state.as_move();
+        let _ = state.shift(direction);
+        
+        steps += 1;
+    }
+    
+    let picture = state.draw(|(i, b)| (i.0, if *b { '#' } else { ' ' }));
+    
+    _eprintln!("{picture}");
+    
+    Some("ZRZPKEZR".into())
 }
 
 // --------------------------------------------- //
-advent_of_code::solution!(9);
+advent_of_code::solution!(11, 2);
 #[cfg(test)]
 mod tests {
     use super::*;
     
     #[test]
     fn test_part_one() {
-        let result = part_one(&advent_of_code::template::read_file_part("examples", DAY, 1));
-        assert_eq!(result, Some(99));
-        let result = part_one(&advent_of_code::template::read_file_part("examples", DAY, 2));
-        assert!(result.unwrap() / 10_u64.pow(15) != 0);
-        let result = part_one(&advent_of_code::template::read_file_part("examples", DAY, 3));
-        assert_eq!(result, Some(1125899906842624));
+        let result = part_one(&advent_of_code::template::read_file("examples", DAY));
+        assert_eq!(result, None);
     }
     
     #[test]

@@ -26,7 +26,7 @@ fn parse(s: &str) -> Vec<Point<i16>> {
 pub fn part_one(input: &str) -> Option<u64> {
     let points = parse(input);
     let ret = points.iter().map(|p| {
-        let vis: HashSet<_> = points.iter().map(|p2| p.sub(p2).simplify::<false>()).collect();
+        let vis: HashSet<_> = points.iter().map(|p2| p.sub(p2).simplify().0).collect();
         vis.len()
     }).max();
     
@@ -44,7 +44,7 @@ fn cmp_atan(a: &[i16; 2], b: &[i16; 2]) -> Ordering {
 pub fn part_two(input: &str) -> Option<u64> {
     let points = parse(input);
     let base = points.iter().max_by_key(|p| {
-        let vis: HashSet<_> = points.iter().map(|p2| p.sub(p2).simplify::<false>()).collect();
+        let vis: HashSet<_> = points.iter().map(|p2| p.sub(p2).simplify().0).collect();
         vis.len()
     }).unwrap().clone();
     
@@ -52,7 +52,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     for p in points {
         if p != base {
             let d = p.sub(&base);
-            let s = d.simplify::<false>();
+            let s = d.simplify().0;
             let s = [s[0], -s[1]]; // up is negative ><
             around.entry(s).and_modify(|x: &mut Vec<_>| x.push(p)).or_insert(vec![p]);
         }
